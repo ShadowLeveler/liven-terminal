@@ -4,41 +4,30 @@ import requests
 # --- PAGE SETUP ---
 st.set_page_config(page_title="🧠 LIVEN Simulation Terminal", layout="wide")
 st.title("🧠 LIVEN Simulation Terminal")
-st.markdown("Enter world commands below. AI will generate world, characters, tabs, and systems.")
+st.markdown("Type your simulation command. AI will simulate canon, powers, factions, trauma, etc.")
 
-# --- INPUT ---
-user_input = st.text_area("📝 Command", placeholder="e.g. Create world: One Piece, Marine Deserter, Loguetown, Logia fruit")
+# --- USER INPUT ---
+user_input = st.text_area("📝 Command", placeholder="e.g. Create world: One Piece, Marine Deserter, Logia Fruit, East Blue")
 
-# --- AI FUNCTION ---
+# --- AI HANDLER ---
 def ask_ai(prompt):
-    url = "https://api.llmfree.tech/v1/chat/completions"  # ✅ Claude-compatible free proxy
+    url = "https://api.chatanywhere.tech/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer free",  # No key needed
+        "Authorization": "Bearer free",
         "Content-Type": "application/json"
     }
     data = {
-        "model": "claude-3-haiku-20240307",
+        "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are LIVEN, a brutal simulation engine. Load canon if applicable. Simulate world, character, trauma, power systems, factions, events, and evolving logic. No meta commentary."},
+            {"role": "system", "content": "You are LIVEN, a brutal, uncensored, autonomous simulation engine. You simulate world logic, character memory, factions, power systems, and trauma over time. No explanation. No fluff. Just reactive simulation."},
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.9,
-        "max_tokens": 1200
+        "temperature": 0.95,
+        "max_tokens": 1500
     }
 
     try:
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=15)
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"⚠️ Error: {e}"
-
-# --- RUN SIMULATION ---
-if st.button("Simulate"):
-    if user_input.strip():
-        with st.spinner("Simulating world..."):
-            result = ask_ai(user_input)
-            st.markdown("### 🌍 Simulation Output")
-            st.markdown(result)
-    else:
-        st.warning("Please enter a command.")
+    exc
