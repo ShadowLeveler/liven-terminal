@@ -1,7 +1,9 @@
 import streamlit as st
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
+from google.auth.transport.requests import Request
 import googleapiclient.discovery
+import urllib.parse
 import json
 
 # --- STREAMLIT SETUP ---
@@ -17,38 +19,51 @@ if "credentials" not in st.session_state:
 sim_output = st.text_area("📜 Simulation Output", height=300)
 
 # --- GOOGLE AUTH FLOW ---
-if not st.session_state["credentials"]:
-    st.markdown("🔐 Please log into Google to enable saving.")
+client_id = st.secrets["GOOGLE_CLIENT_ID"]
+client_secret = st.secrets["GOOGLE_CLIENT_SECRET"]
+REDIRECT_URI = "https://liven-terminal-yjkmpuuqdzfq3lep9h4c7d.streamlit.app"
 
-    client_id = st.secrets["GOOGLE_CLIENT_ID"]
-    client_secret = st.secrets["GOOGLE_CLIENT_SECRET"]
+flow = Flow.from_client_config(
+    {
+        "web": {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uris": [REDIRECT_URI],
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token"
+        }
+    },
+    scopes=[
+        "https://www.googleapis.com/auth/documents",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+    ],
+    redirect_uri=REDIRECT_URI
+)
 
-    # ✅ YOUR DEPLOYED APP URL — DO NOT TOUCH
-    REDIRECT_URI = "https://liven-terminal-yjkmpuuqdzfq3lep9h4c7d.streamlit.app"
+# --- GET TOKEN FROM REDIRECT ---
+query_params = st.experimental_get_query_params()
+if "code" in query_params and st.session_state["credentials"] is None:
+    code = query_params["code"][0]
+    flow.fetch_token(code=code)
+    creds = flow.credentials
+    st.session_state["credentials"] = {
+        "token": creds.token,
+        "refresh_token": creds.refresh_token,
+        "token_uri": creds.token_uri,
+        "client_id": creds.client_id,
+        "client_secret": creds.client_secret,
+        "scopes": creds.scopes
+    }
+    st.success("✅ Google authorization complete. You can now save to memory!")
 
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": client_id,
-                "client_secret": client_secret,
-                "redirect_uris": [REDIRECT_URI],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token"
-            }
-        },
-        scopes=[
-            "https://www.googleapis.com/auth/documents",
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive.file",
-        ],
-        redirect_uri=REDIRECT_URI
-    )
-
+# --- IF NOT AUTHED YET ---
+if st.session_state["credentials"] is None:
     auth_url, _ = flow.authorization_url(prompt='consent')
     st.markdown(f"[🔗 Click here to authorize Google]({auth_url})")
 
+# --- AUTHED: Save Output ---
 else:
-    # --- AUTHENTICATED STATE ---
     creds = Credentials(**st.session_state["credentials"])
     doc_id = st.secrets["DOC_ID"]
     sheet_id = st.secrets["SHEET_ID"]
