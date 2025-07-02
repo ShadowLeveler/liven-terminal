@@ -22,12 +22,15 @@ if not st.session_state["credentials"]:
     client_id = st.secrets["GOOGLE_CLIENT_ID"]
     client_secret = st.secrets["GOOGLE_CLIENT_SECRET"]
 
+    # 👇 CHANGE <your-username> to your actual username
+    REDIRECT_URI = "https://<ShadowLeveler>-liven-terminal.streamlit.app"
+
     flow = Flow.from_client_config(
         {
             "web": {
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_uris": ["http://localhost:8501"],
+                "redirect_uris": [REDIRECT_URI],
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token"
             }
@@ -37,7 +40,7 @@ if not st.session_state["credentials"]:
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive.file",
         ],
-        redirect_uri="http://localhost:8501"
+        redirect_uri=REDIRECT_URI
     )
 
     auth_url, _ = flow.authorization_url(prompt='consent')
