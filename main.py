@@ -3,8 +3,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 import googleapiclient.discovery
-import urllib.parse
-import json
 
 # --- STREAMLIT SETUP ---
 st.set_page_config(page_title="LIVEN Memory Connector", layout="wide")
@@ -42,7 +40,8 @@ flow = Flow.from_client_config(
 )
 
 # --- GET TOKEN FROM REDIRECT ---
-query_params = st.experimental_get_query_params()
+query_params = st.query_params  # ✅ FIXED FOR 2024+
+
 if "code" in query_params and st.session_state["credentials"] is None:
     code = query_params["code"][0]
     flow.fetch_token(code=code)
