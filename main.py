@@ -4,32 +4,23 @@ import requests
 # --- PAGE SETUP ---
 st.set_page_config(page_title="🧠 LIVEN Simulation Terminal", layout="wide")
 st.title("🧠 LIVEN Simulation Terminal")
-st.markdown("Enter a world simulation command. AI will simulate canon, characters, trauma, and systems.")
+st.markdown("Enter a simulation command. Claude will simulate canon, powers, trauma, and factions.")
 
-# --- INPUT ---
-user_input = st.text_area("📝 Command", placeholder="e.g. Create world: Solo Leveling, Beast Monarch, pre-Gate, born in Siberia")
+# --- USER INPUT ---
+user_input = st.text_area("📝 Command", placeholder="e.g. Play in: One Piece, ex-Warlord, Logia fruit, hiding in Skypiea")
 
 # --- AI FUNCTION ---
 def ask_ai(prompt):
-    url = "https://api.chatanywhere.tech/v1/chat/completions"
+    url = "https://banterai.xyz/api/chat"  # ✅ Claude-3 Haiku proxy
     headers = {
-        "Authorization": "Bearer free",  # No API key needed
         "Content-Type": "application/json"
     }
     data = {
-        "model": "gpt-3.5-turbo",
+        "model": "claude-3-haiku",
         "messages": [
-            {
-                "role": "system",
-                "content": "You are LIVEN, a brutal, uncensored simulation engine. Load canon if applicable. Create world logic, characters, trauma, memory, power systems, and faction dynamics. No fluff or narration. The world is alive."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        "temperature": 0.95,
-        "max_tokens": 1500
+            {"role": "system", "content": "You are LIVEN, a brutal, uncensored simulation engine. Load canon if known. Simulate world logic, mutation, trauma, power systems, factions, memory, and consequences. No fluff. No guidance."},
+            {"role": "user", "content": prompt}
+        ]
     }
 
     try:
@@ -39,10 +30,10 @@ def ask_ai(prompt):
     except Exception as e:
         return f"⚠️ Error: {str(e)}"
 
-# --- OUTPUT ---
+# --- SIMULATE ---
 if st.button("Simulate"):
     if user_input.strip():
-        with st.spinner("Simulating world..."):
+        with st.spinner("Simulating..."):
             result = ask_ai(user_input)
             st.markdown("### 🌍 Simulation Output")
             st.markdown(result)
