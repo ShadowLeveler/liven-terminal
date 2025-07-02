@@ -1,9 +1,9 @@
-import openai
 import streamlit as st
 import os
+from openai import OpenAI
 
 # --- SETUP API KEY ---
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # --- PAGE SETUP ---
 st.set_page_config(page_title="LIVEN Simulation Terminal", layout="wide")
@@ -17,8 +17,8 @@ user_input = st.text_area("📝 Command", placeholder="e.g. Create world: Solo L
 if st.button("Simulate"):
     with st.spinner("Simulating world..."):
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4-1106-preview",  # or "gpt-4o"
+            response = client.chat.completions.create(
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a brutal simulation engine (LIVEN). Do not narrate. Accept the user's command as input and generate the simulation state. Load canon if possible. Create tabs, characters, factions, powers, locations, timelines, and tick logic. Respond as if the world is alive and reactive."},
                     {"role": "user", "content": user_input}
@@ -26,7 +26,8 @@ if st.button("Simulate"):
                 temperature=0.9,
                 max_tokens=1200
             )
+            result = response.choices[0].message.content
             st.markdown("### 🌍 Simulation Output")
-            st.markdown(response.choices[0].message.content)
+            st.markdown(result)
         except Exception as e:
             st.error(f"⚠️ Error: {e}")
